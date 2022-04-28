@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    *{
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    body{
+        margin: 0;
+    }
+    #nav-bar{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        background-color: teal;
+        color: white;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    a{
+        text-decoration: none;
+        cursor: pointer;
+        color: white;
+        font-size: 30px;
+    }
+    #search{
+        padding: 10px;
+        margin: auto;
+        width: 250px;
+        margin-top: 20px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    #trending{
+        margin:auto;
+        width:90%; 
+    }
+    #bag{
+        margin:auto;
+        margin-bottom: 20px;
+        display:flex;
+        width:90%;
+        height:300px;
+        overflow-y: scroll;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; 
+    }
+    #bag>div{
+        margin: 20px;
+    }
+    #userdetail>div{
+        display: flex;
+        flex-direction: row;
+    }
+</style>
+<body>
+    <div id="nav-bar">
+    </div>
+    <div id="userdetail" style="display: none;">
+        <div> <div>Name :- </div><div id="name"> </div></div>
+        <div><div> Mobile No. :- </div><div id="mobile"></div></div>
+        <div><div> Email :- </div><div id="email"> </div></div>
+        <div></div>
+    </div>
+    <div id="search">
+        <form action="">
+        <input type="text" id="searchitem" placeholder="Search your receipe">
+        <button id="button" >Search</button>
+    </form>
+    </div>
+    <div id="trending">
+        <h2 id="titletrend">Receipe of the day</h2>
+        <div width="90%" id="trend"></div>
+    </div>
+    
+</body>
+</html>
+
+<script type="module">
+    import {navbar} from './script/navbar.js';
+    document.getElementById("nav-bar").innerHTML=navbar();
+   
+ //fetching data here
+    async function fetchdata(data,url){
+        const fet= await fetch(url);
+        const fdata=await fet.json();
+        return fdata;
+    }
+
+// search function
+    document.getElementById("button").addEventListener("click", searchfun);
+ function searchfun(){
+     event.preventDefault();
+    let data=document.getElementById("searchitem").value;
+    document.getElementById("titletrend").innerText="Search Results";
+    document.getElementById("trend").innerText=""
+    let url=`https://www.themealdb.com/api/json/v1/1/search.php?s=${data}`;
+     
+    displaytrend(url);
+    
+ }
+
+// displaying random Receipe of the day
+    let url2='https://www.themealdb.com/api/json/v1/1/random.php';
+    displaytrend(url2);
+
+    
+ //displaying data   
+    async function displaytrend(url){
+         let data= await fetchdata(null,url) ;
+         let arr=data.meals;
+         console.log(arr)
+         arr.forEach(element => {
+             let bag=document.createElement("div");
+             bag.setAttribute("id","bag")
+          
+             let imgdiv=document.createElement("div");
+             let img=document.createElement("img");
+             img.src=element.strMealThumb;
+             img.style.width="200px"
+             imgdiv.append(img);
+             let matdiv=document.createElement("div");
+             let title=document.createElement("h2");
+             title.innerText=element.strMeal;
+             let dis=document.createElement("div");
+             dis.innerHTML= "<b>Instruction :</b>"+element.strInstructions +"<br>"+"<h4>Ingredient</h4>"
+             matdiv.append(title,dis);
+             
+             for(let i=1;i<20;i++){
+            
+                let ingdiv=document.createElement("p");
+                let ing="strIngredient"+i;
+                let mes="strMeasure"+i;
+                if(element[`${ing}`]==""){
+                    break;
+                }
+                ingdiv.innerText=element[`${ing}`]+ " - "+ element[`${mes}`];
+                matdiv.append(ingdiv);                
+             }
+             bag.append(imgdiv,matdiv);
+             document.getElementById("trend").append(bag)
+             
+             console.log(element.strMeal)
+             
+         });
+    }
+
+    let p = JSON.parse(localStorage.getItem("userdata"))||[];
+    if(p.length ==0){
+        var bag=  document.getElementById("userdetail");
+          bag.style.display="none";
+    }
+    else{
+        var bag=  document.getElementById("userdetail");
+          bag.style.display="block";
+          document.getElementById("name").innerText=p.name;
+          document.getElementById("email").innerText=p.email;
+          document.getElementById("mobile").innerText=p.mobile;
+    }
+ 
+</script>
